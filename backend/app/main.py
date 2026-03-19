@@ -1,11 +1,17 @@
 """ClipFlow Backend — FastAPI Application."""
 
+import shutil
+import subprocess
+from contextlib import asynccontextmanager
+from pathlib import Path
+
 import structlog
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.api.routes import upload, process, download
+from app.config import settings
 from app.exceptions import ClipFlowError
 
 # Structured logging — JSON format
@@ -20,10 +26,35 @@ structlog.configure(
     logger_factory=structlog.stdlib.LoggerFactory(),
 )
 
+log = structlog.get_logger()
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Startup: verify FFmpeg, create storage dir."""
+    # Check FFmpeg
+    if not shutil.which("ffmpeg"):
+        raise RuntimeError("FFmpeg bulunamadı! Lütfen yükleyin.")
+
+    version = subprocess.run(
+        ["ffmpeg", "-version"], capture_output=True, text=True
+    ).stdout.split("\n")[0]
+    log.info("ffmpeg_found", version=version)
+
+    # Create storage directory
+    Path(settings.storage_path).mkdir(parents=True, exist_ok=True)
+    log.info("storage_ready", path=settings.storage_path)
+
+    log.info("app_started", version="0.1.0")
+    yield
+    log.info("app_shutdown")
+
+
 app = FastAPI(
     title="ClipFlow API",
     version="0.1.0",
     description="AI-powered video editor backend",
+    lifespan=lifespan,
 )
 
 # CORS — V1: permissive, V2: restrict to app domain

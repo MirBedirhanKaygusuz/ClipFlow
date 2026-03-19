@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.env
+.venv/
+venv/
+.pytest_cache/
+tests/
+conftest.py
+pytest.ini
+*.mp4
+*.mov
+.git/
