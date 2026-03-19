@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+env/
+
+# Environment
+.env
+*.pem
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Storage / temp videos
+/tmp/
+*.mp4
+*.mov
+*.m4v
+
+# iOS
+ios/ClipFlow/build/
+ios/ClipFlow/*.xcworkspace/xcuserdata/
+ios/ClipFlow/*.xcodeproj/xcuserdata/
+DerivedData/
+
+# Testing
+.pytest_cache/
+htmlcov/
+.coverage
