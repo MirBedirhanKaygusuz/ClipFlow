@@ -1,0 +1,12 @@
+{
+  "tests/test_download.py::test_download_not_found[trio]": true,
+  "tests/test_download.py::test_download_valid_file[trio]": true,
+  "tests/test_process.py::test_get_status_after_submit[asyncio]": true,
+  "tests/test_process.py::test_start_process[trio]": true,
+  "tests/test_process.py::test_start_process_invalid_mode[trio]": true,
+  "tests/test_process.py::test_get_status_not_found[trio]": true,
+  "tests/test_process.py::test_get_status_after_submit[trio]": true,
+  "tests/test_upload.py::test_upload_valid_mp4[trio]": true,
+  "tests/test_upload.py::test_upload_invalid_extension[trio]": true,
+  "tests/test_upload.py::test_upload_mov_accepted[trio]": true
+}

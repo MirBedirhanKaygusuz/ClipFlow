@@ -1,0 +1,12 @@
+{
+  "data" : [
+    {
+      "filename" : "xcode-agent-mcp-guide.md",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

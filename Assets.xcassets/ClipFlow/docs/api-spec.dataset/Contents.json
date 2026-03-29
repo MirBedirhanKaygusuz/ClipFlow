@@ -1,0 +1,12 @@
+{
+  "data" : [
+    {
+      "filename" : "api-spec.md",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

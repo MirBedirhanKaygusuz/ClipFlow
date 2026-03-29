@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git init:*)",
+      "Bash(pip install:*)",
+      "Bash(pip show:*)",
+      "Bash(python -m pytest -v)",
+      "Bash(python -m pytest -v -p no:anyio)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(python -c \"from app.main import app; print\\(''OK: app loaded''\\)\")",
+      "Bash(find /Users/mirkaygusuz/Projeler/Swift/ClipFlow -maxdepth 4 -not -path */.* -not -path */DerivedData/*)"
+    ]
+  }
+}
