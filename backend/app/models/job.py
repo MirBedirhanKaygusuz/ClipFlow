@@ -12,10 +12,16 @@ class JobStatus(str, Enum):
     FAILED = "failed"
 
 
+class QualityMode(str, Enum):
+    """Video output quality preset."""
+    REELS = "reels"             # 1080x1920, 10Mbps, 30fps — Instagram optimized
+    HIGH_QUALITY = "high_quality"  # Original resolution, CRF 17 — visually lossless
+
+
 class ProcessRequest(BaseModel):
     clip_ids: list[str]
     mode: str = "talking_reels"
-    settings: dict = {"output_format": "9:16", "add_captions": True}
+    quality: QualityMode = QualityMode.REELS
     device_token: str | None = None
 
 

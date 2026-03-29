@@ -1,8 +1,9 @@
 """Upload endpoints."""
 
-from fastapi import APIRouter, UploadFile, HTTPException
+from fastapi import APIRouter, Request, HTTPException, Header
 from uuid import uuid4
 from pathlib import Path
+from typing import Optional
 import aiofiles
 
 from app.config import settings
@@ -13,15 +14,17 @@ ALLOWED_EXTENSIONS = {".mp4", ".mov", ".m4v"}
 
 
 @router.post("/upload")
-async def upload_file(file: UploadFile):
-    """Upload a video file. Returns file_id for processing."""
+async def upload_file(
+    request: Request,
+    x_filename: Optional[str] = Header(default="video.mp4"),
+):
+    """Upload a video file as raw binary. Returns file_id for processing."""
 
-    # Validate extension
-    ext = Path(file.filename or "").suffix.lower()
+    # Derive extension from X-Filename header
+    ext = Path(x_filename or "video.mp4").suffix.lower()
     if ext not in ALLOWED_EXTENSIONS:
-        raise HTTPException(400, f"Desteklenmeyen format: {ext}. Sadece MP4/MOV/M4V.")
+        ext = ".mp4"  # safe fallback
 
-    # Generate unique ID and save
     file_id = str(uuid4())
     storage_dir = Path(settings.storage_path)
     storage_dir.mkdir(parents=True, exist_ok=True)
@@ -29,7 +32,7 @@ async def upload_file(file: UploadFile):
 
     size = 0
     async with aiofiles.open(file_path, "wb") as f:
-        while chunk := await file.read(1024 * 1024):  # 1MB chunks
+        async for chunk in request.stream():
             size += len(chunk)
             if size > settings.max_upload_size_mb * 1024 * 1024:
                 await aiofiles.os.remove(file_path)

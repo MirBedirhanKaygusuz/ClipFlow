@@ -46,12 +46,16 @@ clipflow/
 └── memory/                ← Öğrenilen dersler, kararlar
 ```
 
+## Tamamlanan Milestone'lar
+**Milestone 1 — Teknik Doğrulama** ✅ (2026-03-29)
+- [x] Python + FFmpeg: sessizlik tespiti terminalde çalışıyor
+- [x] FastAPI: /upload, /process, /status endpoint'leri
+- [x] iOS: PHPicker ile video seç, server'a upload et
+- [x] End-to-end: iPhone → server → sessizlik kes → geri gönder
+- [x] Quality mode: reels (1080x1920, 10Mbps) / high_quality (CRF 17, orijinal)
+
 ## Aktif Milestone
-**Milestone 1 — Teknik Doğrulama**
-- [ ] Python + FFmpeg: sessizlik tespiti terminalde çalışıyor
-- [ ] FastAPI: /upload, /process, /status endpoint'leri
-- [ ] iOS: PHPicker ile video seç, server'a upload et
-- [ ] End-to-end: iPhone → server → sessizlik kes → geri gönder
+**Milestone 2 — Akıllı Düzenleme** (henüz başlamadı)
 
 ## Yapılmaması Gerekenler — DOKUNMA
 - Timeline editörü (V4, şimdi değil)
