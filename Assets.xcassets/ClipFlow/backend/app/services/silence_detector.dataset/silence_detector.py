@@ -1,33 +1,40 @@
-"""Silence detection and removal using FFmpeg."""
+"""Silence detection and removal using FFmpeg (async)."""
 
-import subprocess
 import json
 import re
 from app.config import settings
+from app.services.ffmpeg_runner import run_ffmpeg, run_ffprobe
 
 
-def get_duration(path: str) -> float:
+async def get_duration(path: str) -> float:
     """Get video duration in seconds."""
     cmd = [
         "ffprobe", "-v", "quiet",
         "-print_format", "json",
-        "-show_format", path
+        "-show_format", path,
     ]
-    result = subprocess.run(cmd, capture_output=True, text=True, check=True)
-    return float(json.loads(result.stdout)["format"]["duration"])
+    stdout = await run_ffprobe(cmd)
+    return float(json.loads(stdout)["format"]["duration"])
 
 
-def detect_silence(input_path: str) -> list[dict]:
-    """Detect silent segments in video using FFmpeg silencedetect."""
+async def detect_silence(input_path: str) -> list[dict]:
+    """Detect silent segments in video using FFmpeg silencedetect.
+
+    Args:
+        input_path: Path to the video file.
+
+    Returns:
+        List of dicts with 'start' and 'end' keys for each silent segment.
+    """
     cmd = [
         "ffmpeg", "-i", input_path,
         "-af", f"silencedetect=noise={settings.silence_threshold_db}dB:d={settings.min_silence_duration}",
-        "-f", "null", "-"
+        "-f", "null", "-",
     ]
-    result = subprocess.run(cmd, capture_output=True, text=True)
+    _, stderr = await run_ffmpeg(cmd, retries=1)
 
     silences = []
-    for line in result.stderr.split("\n"):
+    for line in stderr.split("\n"):
         if "silence_start" in line:
             match = re.search(r"silence_start: ([\d.]+)", line)
             if match:
@@ -40,9 +47,20 @@ def detect_silence(input_path: str) -> list[dict]:
     return silences
 
 
-def cut_silences(input_path: str, output_path: str, silences: list[dict]) -> dict:
-    """Remove silent segments and concatenate speaking parts."""
-    duration = get_duration(input_path)
+async def cut_silences(
+    input_path: str, output_path: str, silences: list[dict]
+) -> dict:
+    """Remove silent segments and concatenate speaking parts.
+
+    Args:
+        input_path: Source video path.
+        output_path: Destination path for the cut video.
+        silences: List of silence segments from detect_silence().
+
+    Returns:
+        Processing stats dict with duration, silence_removed_pct, segments.
+    """
+    duration = await get_duration(input_path)
 
     # Calculate speaking segments
     speaking = []
@@ -79,17 +97,19 @@ def cut_silences(input_path: str, output_path: str, silences: list[dict]) -> dic
         "-map", "[outv]", "-map", "[outa]",
         "-c:v", "libx264", "-preset", settings.ffmpeg_preset,
         "-c:a", "aac",
-        output_path
+        output_path,
     ]
-    subprocess.run(cmd, check=True, capture_output=True)
+    await run_ffmpeg(cmd, retries=1, timeout=300)
 
     # Calculate stats
-    new_duration = get_duration(output_path)
+    new_duration = await get_duration(output_path)
     silence_removed = duration - new_duration
     return {
         "original_duration": round(duration, 1),
         "new_duration": round(new_duration, 1),
         "silence_removed_seconds": round(silence_removed, 1),
-        "silence_removed_pct": round(silence_removed / duration * 100, 1) if duration > 0 else 0,
+        "silence_removed_pct": (
+            round(silence_removed / duration * 100, 1) if duration > 0 else 0
+        ),
         "segments": len(speaking),
     }

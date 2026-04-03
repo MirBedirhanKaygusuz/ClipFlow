@@ -88,6 +88,57 @@ actor APIService {
         return destination
     }
 
+    // MARK: - Folders
+
+    /// Get all folders.
+    func getFolders() async throws -> [Folder] {
+        let url = URL(string: "\(baseURL)/folders")!
+        let (data, response) = try await session.data(from: url)
+        try validateResponse(response)
+        return try JSONDecoder().decode([Folder].self, from: data)
+    }
+
+    /// Create a new folder.
+    func createFolder(name: String, styleId: String? = nil) async throws -> Folder {
+        let url = URL(string: "\(baseURL)/folders")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        var body: [String: Any] = ["name": name]
+        if let styleId { body["style_id"] = styleId }
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+
+        let (data, response) = try await session.data(for: request)
+        try validateResponse(response)
+        return try JSONDecoder().decode(Folder.self, from: data)
+    }
+
+    /// Delete a folder by ID.
+    func deleteFolder(id: String) async throws {
+        let url = URL(string: "\(baseURL)/folders/\(id)")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "DELETE"
+
+        let (_, response) = try await session.data(for: request)
+        try validateResponse(response)
+    }
+
+    /// Add a video to a folder.
+    func addVideoToFolder(folderId: String, videoId: String) async throws -> Folder {
+        let url = URL(string: "\(baseURL)/folders/\(folderId)/videos")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        let body = ["video_id": videoId]
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+
+        let (data, response) = try await session.data(for: request)
+        try validateResponse(response)
+        return try JSONDecoder().decode(Folder.self, from: data)
+    }
+
     // MARK: - Helpers
 
     private func validateResponse(_ response: URLResponse) throws {

@@ -10,7 +10,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from app.api.routes import upload, process, download
+from app.api.routes import upload, process, download, styles, folders
 from app.config import settings
 from app.exceptions import ClipFlowError
 
@@ -70,6 +70,8 @@ app.add_middleware(
 app.include_router(upload.router, prefix="/api/v1", tags=["upload"])
 app.include_router(process.router, prefix="/api/v1", tags=["process"])
 app.include_router(download.router, prefix="/api/v1", tags=["download"])
+app.include_router(styles.router, prefix="/api/v1", tags=["styles"])
+app.include_router(folders.router, prefix="/api/v1", tags=["folders"])
 
 
 @app.exception_handler(ClipFlowError)

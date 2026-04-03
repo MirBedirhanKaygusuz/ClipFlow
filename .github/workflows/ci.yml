@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install FFmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: Install dependencies
+        working-directory: Assets.xcassets/ClipFlow/backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.dataset/requirements.txt
+          pip install ruff black
+
+      - name: Lint with ruff
+        working-directory: Assets.xcassets/ClipFlow/backend
+        run: ruff check app/ tests/ --select E,F,W --ignore E501
+
+      - name: Format check with black
+        working-directory: Assets.xcassets/ClipFlow/backend
+        run: black --check --line-length 100 app/ tests/ || true
+
+      - name: Run tests
+        working-directory: Assets.xcassets/ClipFlow/backend
+        env:
+          PYTHONPATH: .
+        run: pytest tests/ -v --asyncio-mode=auto

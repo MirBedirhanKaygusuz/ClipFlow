@@ -15,6 +15,7 @@ class JobStatus(str, Enum):
 class ProcessRequest(BaseModel):
     clip_ids: list[str]
     mode: str = "talking_reels"
+    quality: str = "reels"
     settings: dict = {"output_format": "9:16", "add_captions": True}
     device_token: str | None = None
 
@@ -32,3 +33,4 @@ class StatusResponse(BaseModel):
     question: str | None = None
     options: list[str] | None = None
     stats: dict | None = None
+    eta_seconds: float | None = None

@@ -2,9 +2,8 @@
 
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse
-from pathlib import Path
 
-from app.config import settings
+from app.services.storage import get_storage
 
 router = APIRouter()
 
@@ -22,10 +21,13 @@ async def download_file(file_id: str) -> FileResponse:
     Raises:
         HTTPException: 404 if file not found.
     """
-    file_path = Path(settings.storage_path) / f"{file_id}.mp4"
+    storage = get_storage()
+    key = f"{file_id}.mp4"
 
-    if not file_path.exists():
+    if not await storage.exists(key):
         raise HTTPException(status_code=404, detail=f"Dosya bulunamadı: {file_id}")
+
+    file_path = await storage.get_path(key)
 
     return FileResponse(
         path=str(file_path),

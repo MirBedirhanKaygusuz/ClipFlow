@@ -12,7 +12,7 @@ final class MainViewModel {
         case preparing                                  // Video seçildi, kopyalanıyor
         case qualitySelect(videoURL: URL)               // Kalite seçimi bekliyor
         case uploading(progress: Double)
-        case processing(progress: Int, step: String)
+        case processing(progress: Int, step: String, eta: Double?)
         case done(localURL: URL, stats: ProcessingStats?)
         case error(message: String)
     }
@@ -67,7 +67,7 @@ final class MainViewModel {
             state = .uploading(progress: 1.0)
 
             // Step 2: Start processing with quality
-            state = .processing(progress: 0, step: "queued")
+            state = .processing(progress: 0, step: "queued", eta: nil)
             let processResult = try await api.startProcessing(
                 clipIds: [uploadResult.fileId],
                 quality: quality
@@ -101,7 +101,7 @@ final class MainViewModel {
                 return
 
             default:
-                state = .processing(progress: status.progress, step: status.step)
+                state = .processing(progress: status.progress, step: status.step, eta: status.etaSeconds)
                 try await Task.sleep(nanoseconds: 2_000_000_000) // 2 saniye
             }
         }

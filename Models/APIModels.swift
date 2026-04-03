@@ -37,10 +37,28 @@ struct StatusResponse: Codable, Sendable {
     let question: String?
     let options: [String]?
     let stats: ProcessingStats?
+    let etaSeconds: Double?
 
     enum CodingKeys: String, CodingKey {
         case status, progress, step, question, options, stats
         case outputUrl = "output_url"
+        case etaSeconds = "eta_seconds"
+    }
+}
+
+/// Project folder containing videos
+struct Folder: Codable, Sendable {
+    let id: String
+    let name: String
+    let createdAt: String
+    let videoIds: [String]
+    let styleId: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id, name
+        case createdAt = "created_at"
+        case videoIds = "video_ids"
+        case styleId = "style_id"
     }
 }
 

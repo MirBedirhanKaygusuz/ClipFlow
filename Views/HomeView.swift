@@ -18,8 +18,8 @@ struct HomeView: View {
                     qualitySelectView(videoURL: videoURL)
                 case .uploading(let progress):
                     uploadingView(progress: progress)
-                case .processing(let progress, let step):
-                    processingView(progress: progress, step: step)
+                case .processing(let progress, let step, let eta):
+                    processingView(progress: progress, step: step, eta: eta)
                 case .done(let localURL, let stats):
                     PreviewView(videoURL: localURL, stats: stats) {
                         viewModel.reset()
@@ -164,7 +164,7 @@ struct HomeView: View {
         }
     }
 
-    private func processingView(progress: Int, step: String) -> some View {
+    private func processingView(progress: Int, step: String, eta: Double?) -> some View {
         VStack(spacing: 16) {
             ProgressView(value: Double(progress), total: 100)
                 .progressViewStyle(.linear)
@@ -176,6 +176,13 @@ struct HomeView: View {
             Text(localizedStep(step))
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
+
+            if let eta, eta > 0 {
+                Text("Tahmini süre: \(Int(eta)) saniye")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+                    .monospacedDigit()
+            }
         }
     }
 

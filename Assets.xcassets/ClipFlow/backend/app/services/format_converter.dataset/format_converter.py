@@ -1,10 +1,10 @@
-"""Video format conversion — 9:16 vertical, etc."""
+"""Video format conversion — 9:16 vertical, etc. (async)."""
 
-import subprocess
 from app.config import settings
+from app.services.ffmpeg_runner import run_ffmpeg
 
 
-def convert_to_vertical(input_path: str, output_path: str) -> None:
+async def convert_to_vertical(input_path: str, output_path: str) -> None:
     """Convert video to 9:16 vertical format (1080x1920).
 
     Args:
@@ -20,6 +20,6 @@ def convert_to_vertical(input_path: str, output_path: str) -> None:
         ),
         "-c:v", "libx264", "-preset", settings.ffmpeg_preset,
         "-c:a", "aac",
-        output_path
+        output_path,
     ]
-    subprocess.run(cmd, check=True, capture_output=True)
+    await run_ffmpeg(cmd, retries=1, timeout=300)
