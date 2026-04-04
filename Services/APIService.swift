@@ -39,23 +39,80 @@ actor APIService {
     // MARK: - Process
 
     /// Start video processing with quality mode.
-    func startProcessing(clipIds: [String], quality: QualityMode = .reels) async throws -> ProcessResponse {
+    func startProcessing(
+        clipIds: [String],
+        mode: ProcessingMode = .talkingReels,
+        quality: QualityMode = .reels,
+        musicFileId: String? = nil,
+        transition: String = "fade",
+        transitionDuration: Double = 0.5
+    ) async throws -> ProcessResponse {
         let url = URL(string: "\(baseURL)/process")!
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
-        let body: [String: Any] = [
+        var body: [String: Any] = [
             "clip_ids": clipIds,
-            "mode": "talking_reels",
+            "mode": mode.rawValue,
             "quality": quality.rawValue,
         ]
+
+        if mode == .musicalEdit {
+            var editSettings: [String: Any] = [
+                "transition": transition,
+                "transition_duration": transitionDuration,
+            ]
+            if let musicFileId {
+                editSettings["music_file_id"] = musicFileId
+            }
+            body["settings"] = editSettings
+        }
+
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
 
         let (data, response) = try await session.data(for: request)
         try validateResponse(response)
 
         return try JSONDecoder().decode(ProcessResponse.self, from: data)
+    }
+
+    // MARK: - Music
+
+    /// Upload a music track.
+    func uploadMusic(fileURL: URL) async throws -> MusicTrack {
+        let url = URL(string: "\(baseURL)/music/upload")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/octet-stream", forHTTPHeaderField: "Content-Type")
+        request.setValue(fileURL.lastPathComponent, forHTTPHeaderField: "X-Filename")
+
+        let (data, response) = try await session.upload(for: request, fromFile: fileURL)
+        try validateResponse(response)
+        return try JSONDecoder().decode(MusicTrack.self, from: data)
+    }
+
+    /// List all music tracks.
+    func getMusicTracks() async throws -> [MusicTrack] {
+        let url = URL(string: "\(baseURL)/music")!
+        let (data, response) = try await session.data(from: url)
+        try validateResponse(response)
+        return try JSONDecoder().decode([MusicTrack].self, from: data)
+    }
+
+    /// Analyze beats in a music track.
+    func analyzeMusic(musicId: String) async throws -> [String: Any] {
+        let url = URL(string: "\(baseURL)/music/\(musicId)/analyze")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+
+        let (data, response) = try await session.data(for: request)
+        try validateResponse(response)
+
+        guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            throw APIError.invalidResponse
+        }
+        return json
     }
 
     // MARK: - Status Polling

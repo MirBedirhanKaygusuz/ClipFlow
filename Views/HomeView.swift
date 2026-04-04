@@ -213,6 +213,12 @@ struct HomeView: View {
         case "silence_detection": return "Sessizlikler tespit ediliyor..."
         case "cutting": return "Sessizlikler kesiliyor..."
         case "format_conversion": return "9:16 formatına dönüştürülüyor..."
+        case "beat_detection": return "Beat'ler tespit ediliyor..."
+        case "highlight_detection": return "En iyi anlar bulunuyor..."
+        case "beat_sync": return "Beat'lere senkronize ediliyor..."
+        case "rendering": return "Video oluşturuluyor..."
+        case "music_mixing": return "Müzik ekleniyor..."
+        case "finalizing": return "Tamamlanıyor..."
         case "queued": return "Kuyrukta..."
         default: return step
         }

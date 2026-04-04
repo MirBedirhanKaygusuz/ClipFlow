@@ -6,6 +6,7 @@ from uuid import uuid4
 from app.models.job import ProcessRequest, ProcessResponse, StatusResponse, JobStatus
 from app.services.job_manager import job_store
 from app.workers.talking_reels import process_talking_reels
+from app.workers.musical_edit import process_musical_edit
 
 router = APIRouter()
 
@@ -24,6 +25,8 @@ async def start_processing(request: ProcessRequest, background_tasks: Background
     # Dispatch to appropriate worker
     if request.mode == "talking_reels":
         background_tasks.add_task(process_talking_reels, job_id, request)
+    elif request.mode == "musical_edit":
+        background_tasks.add_task(process_musical_edit, job_id, request)
     else:
         raise HTTPException(400, f"Bilinmeyen mod: {request.mode}")
 

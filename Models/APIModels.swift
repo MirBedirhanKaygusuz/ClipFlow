@@ -1,9 +1,31 @@
 import Foundation
 
+/// Processing mode — which pipeline to use
+enum ProcessingMode: String, Sendable {
+    case talkingReels = "talking_reels"
+    case musicalEdit = "musical_edit"
+}
+
 /// Quality mode — mirrors backend QualityMode enum
 enum QualityMode: String, Sendable {
     case reels = "reels"
     case highQuality = "high_quality"
+}
+
+/// Music track metadata
+struct MusicTrack: Codable, Sendable {
+    let id: String
+    let filename: String
+    let sizeMb: Double?
+    let tempo: Double?
+    let beatCount: Int?
+    let duration: Double?
+
+    enum CodingKeys: String, CodingKey {
+        case id, filename, tempo, duration
+        case sizeMb = "size_mb"
+        case beatCount = "beat_count"
+    }
 }
 
 /// Upload response from POST /upload
