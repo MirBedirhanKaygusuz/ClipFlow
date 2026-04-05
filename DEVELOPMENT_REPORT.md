@@ -476,13 +476,43 @@ beat_detection → highlight_detection → beat_sync → rendering → music_mix
 
 ---
 
-## 8. Kalan/Gelecek İşler
+## 8. Video Thumbnail Sistemi (M6)
+
+### Ne Yapıyor?
+
+Her video yüklemesinde otomatik olarak temsili bir thumbnail oluşturur. Scene detection kullanarak en ilginç kareyi seçer (siyah kare veya başlangıç yerine).
+
+### Özellikler:
+- **Otomatik thumbnail:** Upload sırasında FFmpeg scene detection ile en iyi kare seçilir
+- **Thumbnail strip:** Timeline scrubbing için 5-20 arasında eşit aralıklı thumbnail
+- **Cache-friendly:** 24 saat Cache-Control header'ı ile serve edilir
+- **Lazy generation:** GET isteğinde thumbnail yoksa otomatik oluşturulur
+
+### Endpoint'ler:
+- `POST /thumbnails/{file_id}` — Thumbnail oluştur (opsiyonel timestamp)
+- `GET /thumbnails/{file_id}` — Thumbnail serve et (JPEG)
+- `POST /thumbnails/{file_id}/strip` — Timeline strip oluştur
+- `GET /thumbnails/{file_id}/strip/{index}` — Strip thumbnail serve et
+
+### Dosyalar:
+| Dosya | Durum | Açıklama |
+|-------|-------|----------|
+| `backend/app/services/thumbnail.py` | YENİ | Thumbnail generation servisi |
+| `backend/app/api/routes/thumbnails.py` | YENİ | REST endpoint'leri |
+| `backend/app/api/routes/upload.py` | Güncellendi | Auto-thumbnail |
+| `backend/app/main.py` | Güncellendi | Thumbnails router |
+| `backend/tests/test_thumbnails.py` | YENİ | 5 test |
+| `Models/APIModels.swift` | Güncellendi | thumbnailUrl field |
+| `Services/APIService.swift` | Güncellendi | thumbnailURL() helper |
+
+---
+
+## 9. Kalan/Gelecek İşler
 
 - [ ] Gerçek sunucuda test (Hetzner VPS kurulumu)
-- [ ] Whisper API ile otomatik altyazı (M5 adayı)
+- [ ] Whisper API ile otomatik altyazı
 - [ ] App Store submission hazırlığı
 - [ ] Kullanıcı kimlik doğrulama (auth — şu an yok)
 - [ ] Rate limiting backend tarafında (Nginx dışında)
 - [ ] Monitoring/alerting (Prometheus + Grafana)
 - [ ] Müzik analiz sonuçlarını cache'leme
-- [ ] Video thumbnail oluşturma

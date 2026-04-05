@@ -32,10 +32,12 @@ struct MusicTrack: Codable, Sendable {
 struct UploadResponse: Codable, Sendable {
     let fileId: String
     let sizeMb: Double
+    let thumbnailUrl: String?
 
     enum CodingKeys: String, CodingKey {
         case fileId = "file_id"
         case sizeMb = "size_mb"
+        case thumbnailUrl = "thumbnail_url"
     }
 }
 

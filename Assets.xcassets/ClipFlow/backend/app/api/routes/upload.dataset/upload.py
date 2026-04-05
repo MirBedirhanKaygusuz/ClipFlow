@@ -8,6 +8,7 @@ import structlog
 
 from app.config import settings
 from app.services.storage import get_storage
+from app.services.thumbnail import generate_thumbnail
 
 router = APIRouter()
 log = structlog.get_logger()
@@ -76,5 +77,17 @@ async def upload_file(request: Request, file: UploadFile | None = None):
     if settings.r2_endpoint:
         await storage.save_from_path(key, str(tmp_path))
 
+    # Auto-generate thumbnail (non-blocking, best-effort)
+    thumbnail_url = None
+    try:
+        await generate_thumbnail(str(tmp_path))
+        thumbnail_url = f"/api/v1/thumbnails/{file_id}"
+    except Exception as e:
+        log.warning("thumbnail_generation_failed", file_id=file_id, error=str(e))
+
     log.info("upload_complete", file_id=file_id, size_mb=round(size / 1024 / 1024, 1))
-    return {"file_id": file_id, "size_mb": round(size / 1024 / 1024, 1)}
+    return {
+        "file_id": file_id,
+        "size_mb": round(size / 1024 / 1024, 1),
+        "thumbnail_url": thumbnail_url,
+    }

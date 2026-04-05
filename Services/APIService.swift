@@ -121,6 +121,13 @@ actor APIService {
         return json
     }
 
+    // MARK: - Thumbnails
+
+    /// Get thumbnail URL for a video. Returns the full URL to fetch the image.
+    func thumbnailURL(fileId: String) -> URL {
+        URL(string: "\(baseURL)/thumbnails/\(fileId)")!
+    }
+
     // MARK: - Status Polling
 
     /// Get current job status.
