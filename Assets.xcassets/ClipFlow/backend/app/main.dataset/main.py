@@ -10,7 +10,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from app.api.routes import upload, process, download, styles, folders, music, thumbnails, validate, presets
+from app.api.routes import upload, process, download, styles, folders, music, thumbnails, validate, presets, waveform
 from app.config import settings
 from app.exceptions import ClipFlowError
 
@@ -76,6 +76,7 @@ app.include_router(music.router, prefix="/api/v1", tags=["music"])
 app.include_router(thumbnails.router, prefix="/api/v1", tags=["thumbnails"])
 app.include_router(validate.router, prefix="/api/v1", tags=["validate"])
 app.include_router(presets.router, prefix="/api/v1", tags=["presets"])
+app.include_router(waveform.router, prefix="/api/v1", tags=["waveform"])
 
 
 @app.exception_handler(ClipFlowError)
