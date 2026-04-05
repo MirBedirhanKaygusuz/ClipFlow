@@ -507,7 +507,35 @@ Her video yüklemesinde otomatik olarak temsili bir thumbnail oluşturur. Scene 
 
 ---
 
-## 9. Kalan/Gelecek İşler
+## 9. Video Doğrulama ve Akıllı Bölme (M7)
+
+### Ne Yapıyor?
+
+Video yüklendikten sonra codec, süre, çözünürlük ve bütünlük kontrolü yapar. Reels limiti (90 saniye) aşan videolar için sahne değişimlerinde doğal kesim noktaları önererek akıllı bölme önerisi sunar.
+
+### Özellikler:
+- **Metadata çıkarımı:** Duration, resolution, codec, FPS, bitrate, rotation, audio varlığı
+- **Validasyon:** Desteklenmeyen codec uyarısı, çok düşük çözünürlük uyarısı, Reels süre uyarısı
+- **Akıllı bölme:** Scene detection ile doğal kesim noktalarında video bölme önerileri (sahne ortasında kesmek yerine)
+- **iOS entegrasyonu:** `VideoValidation` ve `VideoMetadata` modelleri, `validateVideo()` API metodu
+
+### Endpoint'ler:
+- `GET /validate/{file_id}` — Video metadata + doğrulama (hata/uyarı listesi)
+- `GET /validate/{file_id}/splits?max_duration=90` — Akıllı bölme önerileri
+
+### Dosyalar:
+| Dosya | Durum | Açıklama |
+|-------|-------|----------|
+| `backend/app/services/video_validator.py` | YENİ | Validation + split suggestion |
+| `backend/app/api/routes/validate.py` | YENİ | REST endpoint'leri |
+| `backend/app/main.py` | Güncellendi | Validate router |
+| `backend/tests/test_validate.py` | YENİ | 7 test |
+| `Models/APIModels.swift` | Güncellendi | VideoValidation, VideoMetadata |
+| `Services/APIService.swift` | Güncellendi | validateVideo() |
+
+---
+
+## 10. Kalan/Gelecek İşler
 
 - [ ] Gerçek sunucuda test (Hetzner VPS kurulumu)
 - [ ] Whisper API ile otomatik altyazı

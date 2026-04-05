@@ -86,6 +86,37 @@ struct Folder: Codable, Sendable {
     }
 }
 
+/// Video validation result from GET /validate/{id}
+struct VideoValidation: Codable, Sendable {
+    let valid: Bool
+    let errors: [String]
+    let warnings: [String]
+    let info: VideoMetadata?
+}
+
+/// Video metadata from validation
+struct VideoMetadata: Codable, Sendable {
+    let duration: Double
+    let width: Int
+    let height: Int
+    let videoCodec: String
+    let audioCodec: String?
+    let fps: Double
+    let bitrateKbps: Int
+    let fileSizeMb: Double
+    let hasAudio: Bool
+    let rotation: Int
+
+    enum CodingKeys: String, CodingKey {
+        case duration, width, height, fps, rotation
+        case videoCodec = "video_codec"
+        case audioCodec = "audio_codec"
+        case bitrateKbps = "bitrate_kbps"
+        case fileSizeMb = "file_size_mb"
+        case hasAudio = "has_audio"
+    }
+}
+
 /// Processing statistics
 struct ProcessingStats: Codable, Equatable, Sendable {
     let originalDuration: Double?

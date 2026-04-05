@@ -128,6 +128,16 @@ actor APIService {
         URL(string: "\(baseURL)/thumbnails/\(fileId)")!
     }
 
+    // MARK: - Validation
+
+    /// Validate an uploaded video and get metadata.
+    func validateVideo(fileId: String) async throws -> VideoValidation {
+        let url = URL(string: "\(baseURL)/validate/\(fileId)")!
+        let (data, response) = try await session.data(from: url)
+        try validateResponse(response)
+        return try JSONDecoder().decode(VideoValidation.self, from: data)
+    }
+
     // MARK: - Status Polling
 
     /// Get current job status.
