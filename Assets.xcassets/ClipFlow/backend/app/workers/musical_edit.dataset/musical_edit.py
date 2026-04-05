@@ -10,6 +10,7 @@ from app.services.job_manager import job_store
 from app.services.beat_detector import detect_beats, detect_beats_from_music
 from app.services.highlight_detector import detect_highlights
 from app.services.format_converter import convert_to_vertical
+from app.services.zoom_analyzer import analyze_zoom_keyframes, generate_beat_synced_zoom
 from app.services.ffmpeg_runner import run_ffmpeg
 from app.services.push_notification import notify_job_complete, notify_job_failed
 from app.config import settings
@@ -169,14 +170,39 @@ async def _run_musical_pipeline(
     else:
         mixed_path = rendered_path
 
-    # Step 6: Format conversion
+    # Step 6: Zoom analysis + beat sync (if enabled)
+    zoom_keyframes = None
+    enable_zoom = req_settings.get("enable_zoom", False)
+
+    if enable_zoom and request.quality == "reels":
+        job["step"] = "zoom_analysis"
+        job["progress"] = 85
+        _update_eta(85)
+        log.info("musical_step", job_id=job_id, step="zoom_analysis")
+
+        zoom_intensity = float(req_settings.get("zoom_intensity", 0.5))
+        zoom_keyframes = await analyze_zoom_keyframes(
+            str(mixed_path), zoom_intensity=zoom_intensity
+        )
+
+        # Snap zoom keyframes to beat positions
+        zoom_keyframes = await generate_beat_synced_zoom(
+            zoom_keyframes, beat_times, beats.get("onset_times")
+        )
+        log.info(
+            "beat_zoom_synced",
+            job_id=job_id,
+            keyframe_count=len(zoom_keyframes),
+        )
+
+    # Step 7: Format conversion
     output_path = storage_path / f"{job_id}_final.mp4"
 
     if request.quality == "reels":
         job["step"] = "format_conversion"
-        job["progress"] = 90
-        _update_eta(90)
-        await convert_to_vertical(str(mixed_path), str(output_path))
+        job["progress"] = 92
+        _update_eta(92)
+        await convert_to_vertical(str(mixed_path), str(output_path), zoom_keyframes)
     else:
         import shutil
         shutil.copy2(str(mixed_path), str(output_path))
@@ -194,6 +220,7 @@ async def _run_musical_pipeline(
         "clip_count": len(aligned_clips),
         "transition": transition_type,
         "duration": beats.get("duration", 0),
+        "zoom_keyframes": len(zoom_keyframes) if zoom_keyframes else 0,
     }
     log.info("musical_pipeline_done", job_id=job_id, stats=job["stats"])
 

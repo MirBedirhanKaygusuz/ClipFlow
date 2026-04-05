@@ -5,7 +5,7 @@ import SwiftUI
 struct MusicPickerView: View {
     let videoFileId: String
     let quality: QualityMode
-    let onStart: (String, String, Double) -> Void // musicId, transition, duration
+    let onStart: (String, String, Double, Bool, Double) -> Void // musicId, transition, duration, enableZoom, zoomIntensity
     let onCancel: () -> Void
 
     @State private var tracks: [MusicTrack] = []
@@ -14,6 +14,8 @@ struct MusicPickerView: View {
     @State private var isUploading = false
     @State private var transition = "fade"
     @State private var transitionDuration = 0.5
+    @State private var enableZoom = false
+    @State private var zoomIntensity = 0.5
     @State private var showFilePicker = false
     @State private var errorMessage: String?
 
@@ -68,6 +70,24 @@ struct MusicPickerView: View {
                     }
                 }
 
+                // MARK: - Zoom Settings
+                Section("Akıllı Zoom") {
+                    Toggle("Beat'lere senkronize zoom", isOn: $enableZoom)
+
+                    if enableZoom {
+                        HStack {
+                            Text("Yoğunluk")
+                            Slider(value: $zoomIntensity, in: 0.1...1.0, step: 0.1)
+                            Text("%\(Int(zoomIntensity * 100))")
+                                .monospacedDigit()
+                                .frame(width: 36)
+                        }
+                        Text("Beat vuruşlarında zoom in, aralarında zoom out")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
                 // MARK: - Error
                 if let errorMessage {
                     Section {
@@ -86,7 +106,7 @@ struct MusicPickerView: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Başla") {
                         if let id = selectedTrackId {
-                            onStart(id, transition, transitionDuration)
+                            onStart(id, transition, transitionDuration, enableZoom, zoomIntensity)
                         }
                     }
                     .disabled(selectedTrackId == nil)

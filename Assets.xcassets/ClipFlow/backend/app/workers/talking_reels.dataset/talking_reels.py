@@ -8,6 +8,7 @@ from app.models.job import ProcessRequest, JobStatus
 from app.services.job_manager import job_store
 from app.services.silence_detector import detect_silence, cut_silences
 from app.services.format_converter import convert_to_vertical
+from app.services.zoom_analyzer import analyze_zoom_keyframes
 from app.services.push_notification import notify_job_complete, notify_job_failed
 from app.config import settings
 from pathlib import Path
@@ -104,13 +105,33 @@ async def _run_pipeline(
 
     output_path = Path(settings.storage_path) / f"{job_id}_final.mp4"
 
-    # Step 3: Format conversion based on quality mode
+    # Step 3: Zoom analysis (if enabled and reels mode)
+    zoom_keyframes = None
+    req_settings = request.settings or {}
+    enable_zoom = req_settings.get("enable_zoom", False)
+
+    if enable_zoom and request.quality == "reels":
+        job["step"] = "zoom_analysis"
+        job["progress"] = 55
+        _update_eta(55)
+        log.info("pipeline_step", job_id=job_id, step="zoom_analysis")
+        zoom_intensity = float(req_settings.get("zoom_intensity", 0.5))
+        zoom_keyframes = await analyze_zoom_keyframes(
+            str(cut_path), zoom_intensity=zoom_intensity
+        )
+        log.info(
+            "zoom_analysis_done",
+            job_id=job_id,
+            keyframe_count=len(zoom_keyframes),
+        )
+
+    # Step 4: Format conversion based on quality mode
     if request.quality == "reels":
         job["step"] = "format_conversion"
         job["progress"] = 70
         _update_eta(70)
         log.info("pipeline_step", job_id=job_id, step="format_conversion")
-        await convert_to_vertical(str(cut_path), str(output_path))
+        await convert_to_vertical(str(cut_path), str(output_path), zoom_keyframes)
     else:
         # high_quality: keep original resolution, just use the cut file
         job["step"] = "finalizing"

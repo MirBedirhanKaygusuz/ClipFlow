@@ -20,6 +20,10 @@ final class MainViewModel {
     var state: AppState = .idle
     var showPicker = false
 
+    // Zoom settings (user-configurable)
+    var enableZoom = false
+    var zoomIntensity = 0.5
+
     private let api = APIService.shared
     private var currentJobId: String?
     private var selectedQuality: QualityMode = .reels
@@ -55,6 +59,8 @@ final class MainViewModel {
         state = .idle
         currentJobId = nil
         selectedQuality = .reels
+        enableZoom = false
+        zoomIntensity = 0.5
     }
 
     // MARK: - Pipeline
@@ -70,7 +76,9 @@ final class MainViewModel {
             state = .processing(progress: 0, step: "queued", eta: nil)
             let processResult = try await api.startProcessing(
                 clipIds: [uploadResult.fileId],
-                quality: quality
+                quality: quality,
+                enableZoom: enableZoom,
+                zoomIntensity: zoomIntensity
             )
             currentJobId = processResult.jobId
 

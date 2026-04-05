@@ -45,12 +45,19 @@ actor APIService {
         quality: QualityMode = .reels,
         musicFileId: String? = nil,
         transition: String = "fade",
-        transitionDuration: Double = 0.5
+        transitionDuration: Double = 0.5,
+        enableZoom: Bool = false,
+        zoomIntensity: Double = 0.5
     ) async throws -> ProcessResponse {
         let url = URL(string: "\(baseURL)/process")!
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        var settings: [String: Any] = [
+            "enable_zoom": enableZoom,
+            "zoom_intensity": zoomIntensity,
+        ]
 
         var body: [String: Any] = [
             "clip_ids": clipIds,
@@ -59,15 +66,14 @@ actor APIService {
         ]
 
         if mode == .musicalEdit {
-            var editSettings: [String: Any] = [
-                "transition": transition,
-                "transition_duration": transitionDuration,
-            ]
+            settings["transition"] = transition
+            settings["transition_duration"] = transitionDuration
             if let musicFileId {
-                editSettings["music_file_id"] = musicFileId
+                settings["music_file_id"] = musicFileId
             }
-            body["settings"] = editSettings
         }
+
+        body["settings"] = settings
 
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
 

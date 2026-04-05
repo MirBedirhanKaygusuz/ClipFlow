@@ -393,7 +393,90 @@ curl https://your-domain.com/health
 
 ---
 
-## 7. Kalan/Gelecek İşler
+## 7. Akıllı Zoom & Kadraj Kırma Özelliği (M5)
+
+### 7.1 Ne Yapıyor?
+
+Video düzenlemede en temel özelliklerden biri: AI, videonun en ilginç bölgesine otomatik zoom yapabiliyor ve kadrajı kırarak o bölgeye odaklanıyor. Özellikle 9:16 (Reels) formatına dönüştürürken, siyah çubuklar yerine videonun en hareketli kısmına akıllıca crop yapılıyor.
+
+### 7.2 Nasıl Çalışıyor?
+
+**Spatial Motion Detection (Mekânsal Hareket Tespiti):**
+1. Video her kare 3x3 grid'e (9 bölge) ayrılıyor
+2. Her bölge için FFmpeg `scene_score` ile hareket ölçülüyor
+3. En yüksek hareket olan bölgenin koordinatları belirleniyor
+4. Zaman ekseninde keyframe'ler oluşturuluyor
+
+**ZoomKeyframe Veri Modeli:**
+```python
+@dataclass
+class ZoomKeyframe:
+    timestamp: float   # saniye
+    zoom_level: float  # 1.0 = normal, 2.0 = 2x zoom
+    center_x: float    # 0.0-1.0 (normalize yatay konum)
+    center_y: float    # 0.0-1.0 (normalize dikey konum)
+    duration: float    # keyframe süresi
+```
+
+**Smoothing:** Keyframe'ler arasında exponential moving average ile yumuşak geçişler.
+
+**FFmpeg Entegrasyonu:** `zoompan` filtresi ile keyframe'ler animate ediliyor:
+```
+zoompan=z='if(between(on,0,60),1.500,if(between(on,60,120),1.200,1))':x='...':y='...'
+```
+
+### 7.3 Beat-Synced Zoom (Müzikli Edit)
+
+Musical edit modunda zoom efektleri müziğin beat'lerine senkronize ediliyor:
+- **Downbeat'lerde (her 4 vuruş):** Güçlü zoom in
+- **Normal beat'lerde:** Orta zoom
+- **Beat'ler arasında:** Zoom out (nefes alma)
+- **Onset'lerde (perküsif vuruşlar):** Ekstra zoom vurgusu
+
+### 7.4 Pipeline Entegrasyonu
+
+**Talking Reels Pipeline (güncellenmiş):**
+```
+silence_detection → cutting → [zoom_analysis] → format_conversion(+zoom) → done
+```
+
+**Musical Edit Pipeline (güncellenmiş):**
+```
+beat_detection → highlight_detection → beat_sync → rendering → music_mixing → [zoom_analysis → beat_zoom_sync] → format_conversion(+zoom) → done
+```
+
+### 7.5 iOS Entegrasyonu
+
+- **HomeView:** Quality seçiminin altında "Akıllı Zoom" toggle ve yoğunluk slider'ı
+- **MusicPickerView:** "Beat'lere senkronize zoom" toggle ve yoğunluk slider'ı
+- **MainViewModel:** `enableZoom` ve `zoomIntensity` state'leri
+- **APIService:** `startProcessing()` fonksiyonuna `enableZoom` ve `zoomIntensity` parametreleri
+
+### 7.6 Dosyalar
+
+| Dosya | Durum | Açıklama |
+|-------|-------|----------|
+| `backend/app/services/zoom_analyzer.py` | YENİ | Spatial motion + zoom keyframe üretimi |
+| `backend/app/services/format_converter.py` | Güncellendi | Zoom-aware 9:16 dönüşüm |
+| `backend/app/workers/talking_reels.py` | Güncellendi | Zoom analysis adımı |
+| `backend/app/workers/musical_edit.py` | Güncellendi | Beat-synced zoom + stats |
+| `backend/tests/test_zoom.py` | YENİ | 22 test |
+| `Services/APIService.swift` | Güncellendi | Zoom parametreleri |
+| `ViewModels/MainViewModel.swift` | Güncellendi | Zoom state |
+| `Views/HomeView.swift` | Güncellendi | Zoom toggle + slider |
+| `Views/MusicPickerView.swift` | Güncellendi | Beat-sync zoom UI |
+
+### 7.7 Neden Bu Özellik Önemli?
+
+1. **Profesyonel görünüm:** Siyah çubuklar amatör görünür; akıllı crop profesyonel hissi verir
+2. **İçerik kaybı önlenir:** Önemli kısımlar (yüz, hareket) çerçeve dışında kalmaz
+3. **Dinamik etki:** Statik bir video bile zoom efektleriyle canlı ve ilgi çekici olur
+4. **Beat-sync:** Müzikli editlerde zoom, videonun ritmine uyar — izleyici deneyimini artırır
+5. **Temel özellik:** TikTok, Instagram gibi platformlardaki editörlerin standart özelliği
+
+---
+
+## 8. Kalan/Gelecek İşler
 
 - [ ] Gerçek sunucuda test (Hetzner VPS kurulumu)
 - [ ] Whisper API ile otomatik altyazı (M5 adayı)

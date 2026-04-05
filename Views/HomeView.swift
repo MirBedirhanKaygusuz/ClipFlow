@@ -134,6 +134,37 @@ struct HomeView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 14))
             }
 
+            // Zoom settings
+            VStack(spacing: 8) {
+                Toggle(isOn: $viewModel.enableZoom) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "viewfinder")
+                            .foregroundStyle(.purple)
+                        Text("Akıllı Zoom")
+                            .font(.subheadline)
+                    }
+                }
+
+                if viewModel.enableZoom {
+                    HStack {
+                        Text("Yoğunluk")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        Slider(value: $viewModel.zoomIntensity, in: 0.1...1.0, step: 0.1)
+                        Text("%\(Int(viewModel.zoomIntensity * 100))")
+                            .font(.caption.monospacedDigit())
+                            .foregroundStyle(.secondary)
+                            .frame(width: 36)
+                    }
+                    Text("Video'daki harekete göre otomatik zoom ve kadraj kırma")
+                        .font(.caption2)
+                        .foregroundStyle(.tertiary)
+                }
+            }
+            .padding()
+            .background(.ultraThinMaterial)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+
             Button("Vazgeç") {
                 viewModel.reset()
             }
@@ -212,6 +243,7 @@ struct HomeView: View {
         switch step {
         case "silence_detection": return "Sessizlikler tespit ediliyor..."
         case "cutting": return "Sessizlikler kesiliyor..."
+        case "zoom_analysis": return "Akıllı kadraj hesaplanıyor..."
         case "format_conversion": return "9:16 formatına dönüştürülüyor..."
         case "beat_detection": return "Beat'ler tespit ediliyor..."
         case "highlight_detection": return "En iyi anlar bulunuyor..."
