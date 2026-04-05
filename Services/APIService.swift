@@ -128,6 +128,20 @@ actor APIService {
         URL(string: "\(baseURL)/thumbnails/\(fileId)")!
     }
 
+    // MARK: - Export Presets
+
+    /// Get all available export presets.
+    func getExportPresets() async throws -> [ExportPreset] {
+        let url = URL(string: "\(baseURL)/presets")!
+        let (data, response) = try await session.data(from: url)
+        try validateResponse(response)
+
+        struct PresetsResponse: Codable {
+            let presets: [ExportPreset]
+        }
+        return try JSONDecoder().decode(PresetsResponse.self, from: data).presets
+    }
+
     // MARK: - Validation
 
     /// Validate an uploaded video and get metadata.

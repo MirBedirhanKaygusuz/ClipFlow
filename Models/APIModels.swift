@@ -117,6 +117,31 @@ struct VideoMetadata: Codable, Sendable {
     }
 }
 
+/// Export preset for a specific platform
+struct ExportPreset: Codable, Sendable, Identifiable {
+    let id: String
+    let name: String
+    let platform: String
+    let width: Int
+    let height: Int
+    let fps: Int
+    let videoBitrateKbps: Int
+    let audioBitrateKbps: Int
+    let maxDuration: Double
+    let aspectRatio: String
+    let codec: String
+    let preset: String
+    let description: String
+
+    enum CodingKeys: String, CodingKey {
+        case id, name, platform, width, height, fps, codec, preset, description
+        case videoBitrateKbps = "video_bitrate_kbps"
+        case audioBitrateKbps = "audio_bitrate_kbps"
+        case maxDuration = "max_duration"
+        case aspectRatio = "aspect_ratio"
+    }
+}
+
 /// Processing statistics
 struct ProcessingStats: Codable, Equatable, Sendable {
     let originalDuration: Double?

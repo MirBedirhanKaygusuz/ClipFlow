@@ -535,7 +535,80 @@ Video yüklendikten sonra codec, süre, çözünürlük ve bütünlük kontrolü
 
 ---
 
-## 10. Kalan/Gelecek İşler
+## 10. Export Presets Sistemi (M8)
+
+### Ne Yapıyor?
+
+Platform-spesifik encoding profilleri sunar. Kullanıcı "Instagram Reels", "TikTok", "YouTube Shorts" gibi bir platform seçtiğinde, o platformun önerdiği çözünürlük, bitrate, FPS ve süre limitleri otomatik uygulanır.
+
+### Tanımlı Preset'ler:
+| Preset | Platform | Çözünürlük | FPS | Maks Süre | Bitrate |
+|--------|----------|-----------|-----|-----------|---------|
+| instagram_reels | Instagram | 1080x1920 | 30 | 90s | 8 Mbps |
+| instagram_story | Instagram | 1080x1920 | 30 | 60s | 6 Mbps |
+| tiktok | TikTok | 1080x1920 | 30 | 180s | 6 Mbps |
+| youtube_shorts | YouTube | 1080x1920 | 30 | 60s | 10 Mbps |
+| youtube_standard | YouTube | 1920x1080 | 30 | - | 12 Mbps |
+| youtube_4k | YouTube | 3840x2160 | 30 | - | 35 Mbps |
+| twitter | X/Twitter | 1080x1920 | 30 | 140s | 5 Mbps |
+| square | Genel | 1080x1080 | 30 | - | 6 Mbps |
+| archive_hq | Arşiv | Orijinal | Orijinal | - | 20 Mbps |
+
+### Endpoint'ler:
+- `GET /presets` — Tüm preset'leri listele
+- `GET /presets/{id}` — Tek preset detayı
+- `GET /presets/{id}/ffmpeg` — Preset'in FFmpeg argümanları
+
+### Dosyalar:
+| Dosya | Durum | Açıklama |
+|-------|-------|----------|
+| `backend/app/services/export_presets.py` | YENİ | Preset tanımları + FFmpeg args builder |
+| `backend/app/api/routes/presets.py` | YENİ | REST endpoint'leri |
+| `backend/app/main.py` | Güncellendi | Presets router |
+| `backend/tests/test_presets.py` | YENİ | 14 test |
+| `Models/APIModels.swift` | Güncellendi | ExportPreset model |
+| `Services/APIService.swift` | Güncellendi | getExportPresets() |
+
+---
+
+## 11. Toplam Proje İstatistikleri
+
+### Commit Geçmişi (Branch: `claude/review-project-status-6hoTE`)
+1. `79abb62` — M1-M3: Bug fixes, async FFmpeg, storage, push, styles, folders
+2. `aff8403` — M4: Musical edit pipeline (beat-synced editing)
+3. `61f613d` — Deploy: Nginx, setup.sh, .env.example, tests, MusicPickerView
+4. `be190df` — M5: AI-driven smart zoom/crop with beat sync
+5. `34f3faa` — M6: Video thumbnail generation with scene detection
+6. `35c64f7` — M7: Video validation, metadata, smart split
+7. (Bu commit) — M8: Export presets
+
+### Test Sayıları
+| Test Dosyası | Test Sayısı |
+|-------------|------------|
+| test_upload.py | 3 (mevcut) |
+| test_process.py | 4 (mevcut) |
+| test_download.py | (mevcut) |
+| test_styles.py | 9 |
+| test_folders.py | 12 |
+| test_music.py | 8 |
+| test_zoom.py | 22 |
+| test_thumbnails.py | 5 |
+| test_validate.py | 7 |
+| test_presets.py | 14 |
+| **Toplam yeni** | **77** |
+
+### Yeni Dosya Sayısı
+- **Backend servisleri:** 9 yeni
+- **Backend endpoint'leri:** 6 yeni
+- **Backend testleri:** 7 yeni
+- **iOS Views:** 3 yeni
+- **iOS ViewModels:** 1 yeni
+- **Deploy dosyaları:** 4 yeni (Dockerfile, docker-compose, nginx, setup.sh)
+- **CI/CD:** 1 yeni (.github/workflows/ci.yml)
+
+---
+
+## 12. Kalan/Gelecek İşler
 
 - [ ] Gerçek sunucuda test (Hetzner VPS kurulumu)
 - [ ] Whisper API ile otomatik altyazı
@@ -544,3 +617,4 @@ Video yüklendikten sonra codec, süre, çözünürlük ve bütünlük kontrolü
 - [ ] Rate limiting backend tarafında (Nginx dışında)
 - [ ] Monitoring/alerting (Prometheus + Grafana)
 - [ ] Müzik analiz sonuçlarını cache'leme
+- [ ] Export preset'lerini pipeline'a tam entegre etme (format_converter'da preset bazlı encoding)
