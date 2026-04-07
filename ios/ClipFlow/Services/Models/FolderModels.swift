@@ -8,10 +8,12 @@ struct Folder: Codable, Identifiable, Sendable, Hashable {
     var name: String
     let createdAt: Date
     var videoIds: [String]
+    var styleId: String?
 
     enum CodingKeys: String, CodingKey {
         case id, name, videoIds = "video_ids"
         case createdAt = "created_at"
+        case styleId = "style_id"
     }
 }
 
