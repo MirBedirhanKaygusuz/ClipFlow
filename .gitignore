@@ -37,3 +37,4 @@ DerivedData/
 .pytest_cache/
 htmlcov/
 .coverage
+.claude/
