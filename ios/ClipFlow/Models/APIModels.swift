@@ -52,3 +52,31 @@ struct ProcessingStats: Codable {
         case segments
     }
 }
+
+// MARK: - Music
+
+struct MusicTrack: Codable, Identifiable {
+    let id: String
+    let filename: String
+    let tempo: Double?
+    let duration: Double?
+
+    enum CodingKeys: String, CodingKey {
+        case id = "file_id"
+        case filename, tempo, duration
+    }
+}
+
+// MARK: - Quality Mode
+
+enum QualityMode: String, CaseIterable {
+    case reels = "reels"
+    case highQuality = "high_quality"
+
+    var displayName: String {
+        switch self {
+        case .reels: return "Reels (9:16)"
+        case .highQuality: return "Y\u00fcksek Kalite"
+        }
+    }
+}
