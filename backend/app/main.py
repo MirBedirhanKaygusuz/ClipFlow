@@ -10,7 +10,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from app.api.routes import upload, process, download
+from app.api.routes import upload, process, download, folders, music, thumbnails, validate, presets
 from app.config import settings
 from app.exceptions import ClipFlowError
 
@@ -43,6 +43,9 @@ async def lifespan(app: FastAPI):
 
     # Create storage directory
     Path(settings.storage_path).mkdir(parents=True, exist_ok=True)
+    # Create subdirectories used by new routes
+    (Path(settings.storage_path) / "music").mkdir(parents=True, exist_ok=True)
+    (Path(settings.storage_path) / "thumbnails").mkdir(parents=True, exist_ok=True)
     log.info("storage_ready", path=settings.storage_path)
 
     log.info("app_started", version="0.1.0")
@@ -70,6 +73,11 @@ app.add_middleware(
 app.include_router(upload.router, prefix="/api/v1", tags=["upload"])
 app.include_router(process.router, prefix="/api/v1", tags=["process"])
 app.include_router(download.router, prefix="/api/v1", tags=["download"])
+app.include_router(folders.router, prefix="/api/v1", tags=["folders"])
+app.include_router(music.router, prefix="/api/v1", tags=["music"])
+app.include_router(thumbnails.router, prefix="/api/v1", tags=["thumbnails"])
+app.include_router(validate.router, prefix="/api/v1", tags=["validate"])
+app.include_router(presets.router, prefix="/api/v1", tags=["presets"])
 
 
 @app.exception_handler(ClipFlowError)
