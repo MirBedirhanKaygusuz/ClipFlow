@@ -2,6 +2,7 @@ import SwiftUI
 
 // MARK: - Reusable UI Components
 
+/// A frosted glass container with a subtle gradient border.
 struct GlassyCard<Content: View>: View {
     let content: Content
 
@@ -26,9 +27,10 @@ struct GlassyCard<Content: View>: View {
     }
 }
 
+/// A primary call-to-action button with neon gradient and optional glow.
 struct NeonButtonStyle: ButtonStyle {
     var isGlowing: Bool = true
-
+    
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.headline.bold())
@@ -46,6 +48,7 @@ struct NeonButtonStyle: ButtonStyle {
     }
 }
 
+/// A secondary button style with neon borders instead of solid fill.
 struct NeonBorderButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
@@ -64,16 +67,19 @@ struct NeonBorderButtonStyle: ButtonStyle {
     }
 }
 
+/// A glowing progress bar used during video processing.
 struct NeonProgressView: View {
-    let progress: Double
-
+    let progress: Double // 0.0 to 1.0
+    
     var body: some View {
         GeometryReader { geometry in
             ZStack(alignment: .leading) {
+                // Background track
                 RoundedRectangle(cornerRadius: 8)
                     .fill(Theme.surface)
                     .frame(height: 8)
-
+                
+                // Animated fill
                 RoundedRectangle(cornerRadius: 8)
                     .fill(Theme.primaryGradient)
                     .frame(width: max(0, geometry.size.width * CGFloat(progress)), height: 8)

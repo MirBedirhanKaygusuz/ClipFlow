@@ -13,73 +13,86 @@ struct PreviewView: View {
     @State private var showError = false
 
     var body: some View {
-        VStack(spacing: 20) {
-            if let player {
-                VideoPlayer(player: player)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                    .frame(maxHeight: 400)
-            }
+        ZStack {
+            Theme.background.ignoresSafeArea()
 
-            if let stats {
-                statsView(stats)
-            }
-
-            HStack(spacing: 16) {
-                Button {
-                    saveToPhotos()
-                } label: {
-                    Label(saved ? "Kaydedildi" : "Kaydet", systemImage: saved ? "checkmark.circle.fill" : "square.and.arrow.down")
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(saved ? .green : .blue)
-                        .foregroundStyle(.white)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
+            VStack(spacing: 24) {
+                if let player = player {
+                    VideoPlayer(player: player)
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16)
+                                .stroke(Theme.surface, lineWidth: 2)
+                        )
+                        .shadow(color: .black.opacity(0.5), radius: 20, y: 10)
+                        .frame(maxHeight: UIScreen.main.bounds.height * 0.5)
                 }
-                .disabled(saved)
 
-                Button {
-                    onDismiss()
-                } label: {
-                    Label("Yeni Video", systemImage: "plus")
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(.secondary.opacity(0.2))
-                        .foregroundStyle(.primary)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                if let stats = stats {
+                    GlassyCard {
+                        statsView(stats)
+                    }
                 }
+
+                Spacer()
+
+                VStack(spacing: 16) {
+                    Button {
+                        saveToPhotos()
+                    } label: {
+                        Label(saved ? "Galeriye Kaydedildi" : "Galeriye Kaydet", systemImage: saved ? "checkmark.circle.fill" : "square.and.arrow.down")
+                    }
+                    .buttonStyle(NeonButtonStyle(isGlowing: !saved))
+                    .disabled(saved)
+
+                    Button {
+                        onDismiss()
+                    } label: {
+                        Label("Yeni Video İşle", systemImage: "plus")
+                    }
+                    .buttonStyle(NeonBorderButtonStyle())
+                }
+                .padding(.horizontal)
+                .padding(.bottom, 20)
             }
-            .padding(.horizontal)
+            .padding()
         }
         .onAppear {
             player = AVPlayer(url: videoURL)
             player?.play()
         }
         .alert("Kaydetme hatası", isPresented: $showError) {
-            Button("Tamam") {}
+            Button("Tamam", role: .cancel) {}
         }
     }
 
     private func statsView(_ stats: ProcessingStats) -> some View {
-        HStack(spacing: 24) {
+        HStack {
+            Spacer()
             if let pct = stats.silenceRemovedPct {
-                statBadge(value: "%\(Int(pct))", label: "Sessizlik kesildi")
+                statBadge(value: "%\(Int(pct))", label: "Kısaltılma")
             }
+            Spacer()
             if let segments = stats.segments {
-                statBadge(value: "\(segments)", label: "Segment")
+                statBadge(value: "\(segments)", label: "Parça")
             }
+            Spacer()
             if let newDuration = stats.newDuration {
-                statBadge(value: "\(Int(newDuration))s", label: "Yeni süre")
+                statBadge(value: "\(Int(newDuration))s", label: "Kalan Süre")
             }
+            Spacer()
         }
-        .font(.caption)
+        .padding(.vertical, 8)
     }
 
     private func statBadge(value: String, label: String) -> some View {
-        VStack(spacing: 4) {
+        VStack(spacing: 6) {
             Text(value)
-                .font(.title3.bold().monospacedDigit())
+                .font(.title2.bold().monospacedDigit())
+                .foregroundStyle(Theme.neonTeal)
             Text(label)
-                .foregroundStyle(.secondary)
+                .font(.caption)
+                .foregroundStyle(Theme.textSecondary)
         }
     }
 

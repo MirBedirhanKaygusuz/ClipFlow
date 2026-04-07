@@ -1,5 +1,6 @@
 import SwiftUI
 
+/// Shows videos inside a specific folder with management actions.
 struct FolderDetailView: View {
     let folder: Folder
 
@@ -20,11 +21,11 @@ struct FolderDetailView: View {
                 .font(.system(size: 48))
                 .foregroundStyle(.secondary)
 
-            Text("Bu klas\u00f6rde hen\u00fcz video yok")
+            Text("Bu klasörde henüz video yok")
                 .font(.headline)
                 .foregroundStyle(.secondary)
 
-            Text("Bir video i\u015fledikten sonra bu klas\u00f6re ekleyebilirsiniz.")
+            Text("Bir video işledikten sonra bu klasöre ekleyebilirsiniz.")
                 .font(.subheadline)
                 .foregroundStyle(.tertiary)
                 .multilineTextAlignment(.center)

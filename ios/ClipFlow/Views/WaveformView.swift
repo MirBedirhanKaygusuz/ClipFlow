@@ -1,5 +1,7 @@
 import SwiftUI
 
+/// Renders an audio waveform visualization from normalized sample data.
+/// Samples should be floats in the range 0.0 to 1.0.
 struct WaveformView: View {
     let samples: [Double]
     var barColor: Color = .blue
@@ -26,6 +28,7 @@ struct WaveformView: View {
     }
 }
 
+/// Async waveform view that loads data from the API.
 struct AsyncWaveformView: View {
     let fileId: String
     var samples: Int = 100
@@ -33,6 +36,8 @@ struct AsyncWaveformView: View {
 
     @State private var waveformData: [Double] = []
     @State private var isLoading = true
+
+    private let api = APIService.shared
 
     var body: some View {
         Group {
@@ -57,7 +62,7 @@ struct AsyncWaveformView: View {
         defer { isLoading = false }
 
         do {
-            let url = URL(string: "http://localhost:8000/api/v1/waveform/\(fileId)?samples=\(samples)")!
+            let url = URL(string: "http://192.168.1.101:8000/api/v1/waveform/\(fileId)?samples=\(samples)")!
             let (data, _) = try await URLSession.shared.data(from: url)
 
             struct WaveformResponse: Codable {

@@ -4,7 +4,19 @@ import SwiftUI
 struct ClipFlowApp: App {
     var body: some Scene {
         WindowGroup {
-            HomeView()
+            TabView {
+                HomeView()
+                    .tabItem {
+                        Label("Düzenle", systemImage: "scissors")
+                    }
+                
+                FolderListView()
+                    .tabItem {
+                        Label("Projeler", systemImage: "folder")
+                    }
+            }
+            .preferredColorScheme(.dark)
+            .tint(Theme.neonTeal)
         }
     }
 }
