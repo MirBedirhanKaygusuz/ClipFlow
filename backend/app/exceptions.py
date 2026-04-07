@@ -33,3 +33,19 @@ class JobNotFoundError(ClipFlowError):
 class ProcessingTimeoutError(ClipFlowError):
     def __init__(self, job_id: str):
         super().__init__(f"Processing timeout: {job_id}", 504)
+
+
+class StorageError(ClipFlowError):
+    """Raised when a file storage operation fails (local FS or R2)."""
+
+    def __init__(self, operation: str, detail: str):
+        super().__init__(f"Storage error during {operation}: {detail}", 500)
+
+
+class PushNotificationError(ClipFlowError):
+    """Raised when an APNs push notification cannot be delivered."""
+
+    def __init__(self, device_token: str, detail: str):
+        super().__init__(
+            f"Push notification failed for token {device_token[:8]}…: {detail}", 502
+        )
