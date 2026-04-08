@@ -28,11 +28,13 @@ async def process_talking_reels(job_id: str, request: ProcessRequest) -> None:
     try:
         job = job_store[job_id]
         job["status"] = JobStatus.PROCESSING
+        job["eta_seconds"] = None
         quality = request.quality
 
         # Step 1: Silence detection
         job["step"] = "silence_detection"
         job["progress"] = 10
+        job["eta_seconds"] = 60
         log.info("pipeline_step", job_id=job_id, step="silence_detection", quality=quality.value)
 
         # Find the uploaded file — extension may be .mp4, .mov, or .m4v
@@ -48,6 +50,7 @@ async def process_talking_reels(job_id: str, request: ProcessRequest) -> None:
         # Step 2: Cut silences
         job["step"] = "cutting"
         job["progress"] = 40
+        job["eta_seconds"] = 40
         log.info("pipeline_step", job_id=job_id, step="cutting", silence_count=len(silences))
 
         cut_path = storage_dir / f"{job_id}_cut.mp4"
@@ -59,6 +62,7 @@ async def process_talking_reels(job_id: str, request: ProcessRequest) -> None:
         if quality == QualityMode.REELS:
             job["step"] = "format_conversion"
             job["progress"] = 70
+            job["eta_seconds"] = 20
             log.info("pipeline_step", job_id=job_id, step="format_conversion")
 
             output_path = storage_dir / f"{job_id}_final.mp4"

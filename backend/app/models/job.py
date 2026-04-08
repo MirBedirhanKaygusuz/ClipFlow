@@ -18,10 +18,23 @@ class QualityMode(str, Enum):
     HIGH_QUALITY = "high_quality"  # Original resolution, CRF 17 — visually lossless
 
 
+class ProcessSettings(BaseModel):
+    """Optional processing settings from iOS client."""
+
+    output_format: str = "9:16"
+    add_captions: bool = False
+    enable_zoom: bool = False
+    zoom_intensity: float = 0.5
+    transition: str = "fade"
+    transition_duration: float = 0.5
+    music_file_id: str | None = None
+
+
 class ProcessRequest(BaseModel):
     clip_ids: list[str]
     mode: str = "talking_reels"
     quality: QualityMode = QualityMode.REELS
+    settings: ProcessSettings = ProcessSettings()
     device_token: str | None = None
 
 
@@ -38,3 +51,4 @@ class StatusResponse(BaseModel):
     question: str | None = None
     options: list[str] | None = None
     stats: dict | None = None
+    eta_seconds: int | None = None
