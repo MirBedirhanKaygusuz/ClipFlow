@@ -1,6 +1,5 @@
 import Foundation
 
-// MARK: - Folder Models
 
 /// A project folder that groups related videos
 struct Folder: Codable, Identifiable, Sendable, Hashable {

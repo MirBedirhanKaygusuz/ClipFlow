@@ -6,7 +6,6 @@ import Observation
 @MainActor
 final class FolderViewModel {
 
-    // MARK: - State
 
     var folders: [Folder] = []
     var isLoading = false
@@ -22,7 +21,6 @@ final class FolderViewModel {
 
     private let api = APIService.shared
 
-    // MARK: - Actions
 
     /// Fetch all folders from the server.
     func loadFolders() async {

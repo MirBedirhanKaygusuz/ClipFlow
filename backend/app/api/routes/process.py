@@ -21,7 +21,6 @@ async def start_processing(request: ProcessRequest, background_tasks: Background
         "step": "queued",
     }
 
-    # Dispatch to appropriate worker
     if request.mode == "talking_reels":
         background_tasks.add_task(process_talking_reels, job_id, request)
     else:

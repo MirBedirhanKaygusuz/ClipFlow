@@ -32,7 +32,6 @@ log = structlog.get_logger()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Startup: verify FFmpeg, create storage dir."""
-    # Check FFmpeg
     if not shutil.which("ffmpeg"):
         raise RuntimeError("FFmpeg bulunamadı! Lütfen yükleyin.")
 
@@ -41,9 +40,7 @@ async def lifespan(app: FastAPI):
     ).stdout.split("\n")[0]
     log.info("ffmpeg_found", version=version)
 
-    # Create storage directory
     Path(settings.storage_path).mkdir(parents=True, exist_ok=True)
-    # Create subdirectories used by new routes
     (Path(settings.storage_path) / "music").mkdir(parents=True, exist_ok=True)
     (Path(settings.storage_path) / "thumbnails").mkdir(parents=True, exist_ok=True)
     log.info("storage_ready", path=settings.storage_path)
@@ -60,7 +57,6 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS — V1: permissive, V2: restrict to app domain
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -69,7 +65,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Routers
 app.include_router(upload.router, prefix="/api/v1", tags=["upload"])
 app.include_router(process.router, prefix="/api/v1", tags=["process"])
 app.include_router(download.router, prefix="/api/v1", tags=["download"])

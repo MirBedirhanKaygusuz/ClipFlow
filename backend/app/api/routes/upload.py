@@ -20,7 +20,6 @@ async def upload_file(
 ):
     """Upload a video file as raw binary. Returns file_id for processing."""
 
-    # Derive extension from X-Filename header
     ext = Path(x_filename or "video.mp4").suffix.lower()
     if ext not in ALLOWED_EXTENSIONS:
         ext = ".mp4"  # safe fallback

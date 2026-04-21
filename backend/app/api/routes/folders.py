@@ -15,7 +15,6 @@ from app.models.folder import (
 router = APIRouter()
 log = structlog.get_logger()
 
-# V1: in-memory store — V2: migrate to persistent DB
 folder_store: dict[str, Folder] = {}
 
 

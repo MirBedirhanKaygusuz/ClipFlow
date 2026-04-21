@@ -130,7 +130,6 @@ def cut_silences(
     speaking = _get_speaking_segments(silences, duration)
     filter_complex = _build_filter_complex(speaking)
 
-    # Base command
     cmd = [
         "ffmpeg", "-y", "-i", input_path,
         "-filter_complex", filter_complex,
@@ -157,7 +156,6 @@ def cut_silences(
     cmd.append(output_path)
     subprocess.run(cmd, check=True, capture_output=True)
 
-    # Calculate stats
     new_duration = get_duration(output_path)
     silence_removed = duration - new_duration
     return {

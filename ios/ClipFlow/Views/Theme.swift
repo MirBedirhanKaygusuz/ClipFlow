@@ -1,6 +1,5 @@
 import SwiftUI
 
-// MARK: - Theme (Digital Darkroom)
 
 /// Defines the color palette and constants for the Digital Darkroom design system.
 enum Theme {

@@ -17,7 +17,6 @@ from app.exceptions import ClipFlowError, FFmpegError
 router = APIRouter()
 log = structlog.get_logger()
 
-# V1: in-memory store — V2: persist to DB
 track_store: dict[str, dict] = {}
 
 ALLOWED_AUDIO_EXTENSIONS = {".mp3", ".m4a", ".aac", ".wav", ".flac", ".ogg"}

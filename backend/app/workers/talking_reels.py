@@ -31,13 +31,11 @@ async def process_talking_reels(job_id: str, request: ProcessRequest) -> None:
         job["eta_seconds"] = None
         quality = request.quality
 
-        # Step 1: Silence detection
         job["step"] = "silence_detection"
         job["progress"] = 10
         job["eta_seconds"] = 60
         log.info("pipeline_step", job_id=job_id, step="silence_detection", quality=quality.value)
 
-        # Find the uploaded file — extension may be .mp4, .mov, or .m4v
         clip_id = request.clip_ids[0]
         storage_dir = Path(settings.storage_path)
         input_path = next(
@@ -47,7 +45,6 @@ async def process_talking_reels(job_id: str, request: ProcessRequest) -> None:
 
         silences = await asyncio.to_thread(detect_silence, str(input_path))
 
-        # Step 2: Cut silences
         job["step"] = "cutting"
         job["progress"] = 40
         job["eta_seconds"] = 40
@@ -58,7 +55,6 @@ async def process_talking_reels(job_id: str, request: ProcessRequest) -> None:
             cut_silences, str(input_path), str(cut_path), silences, quality,
         )
 
-        # Step 3: Format encoding (only for reels — high_quality is already final)
         if quality == QualityMode.REELS:
             job["step"] = "format_conversion"
             job["progress"] = 70
@@ -68,11 +64,9 @@ async def process_talking_reels(job_id: str, request: ProcessRequest) -> None:
             output_path = storage_dir / f"{job_id}_final.mp4"
             await asyncio.to_thread(encode_output, str(cut_path), str(output_path), quality)
         else:
-            # High quality: cut output IS the final output
             output_path = cut_path
             job["progress"] = 90
 
-        # Done
         job["status"] = JobStatus.DONE
         job["progress"] = 100
         job["step"] = "done"

@@ -1,6 +1,5 @@
 import SwiftUI
 
-// MARK: - Reusable UI Components
 
 /// A frosted glass container with a subtle gradient border.
 struct GlassyCard<Content: View>: View {
